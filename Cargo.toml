@@ -6,6 +6,7 @@ license = "MIT"
 license_file = "LICENSE"
 homepage = "https://github.com/metamolecular/ctcore"
 readme = "README.md"
+description = "Precision tools for the CTfile family of file formats."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
