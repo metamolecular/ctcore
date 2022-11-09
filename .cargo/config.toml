@@ -1,0 +1,2 @@
+[alias]
+autotest = ["watch", "-x t --lib --all"]
