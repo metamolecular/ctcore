@@ -1,6 +1,6 @@
 # CTcore
 
-CTcore is a suite of precision tools for reading and ultimately writing the CTfile family of formats found throughout computational chemistry and cheminformatics.
+CTcore is a suite of precision tools for reading and ultimately writing the CTfile family of formats found throughout computational chemistry and cheminformatics. For details, see [Reading CTfiles with CTcore](https://depth-first.com/articles/2022/11/09/reading-ctfiles-with-ctcore/).
 
 # Test Suite
 
