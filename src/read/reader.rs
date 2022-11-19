@@ -59,16 +59,12 @@ impl<'a> Reader<'a> {
     pub fn sequence<const L: usize>(
         &mut self,
     ) -> Result<Option<Sequence<L>>, Error> {
-        println!("sequence");
         let chars = match self.all_or_none(L)? {
             Some(chars) => chars,
             None => {
-                println!("NONE");
                 return Ok(None);
             }
         };
-
-        println!("chars {:?}", chars);
 
         Ok(Some(Sequence::new(chars).expect("sequence")))
     }

@@ -2,7 +2,9 @@ use std::io::Read;
 use std::{fs, io};
 
 use ctcore::read::Reader;
-use ctcore::text::{Character, FixedCount, FortranFloat, FortranInt, Sequence, Count};
+use ctcore::text::{
+    Character, Count, FixedCount, FortranFloat, FortranInt, Sequence,
+};
 
 use pretty_assertions::assert_eq;
 
