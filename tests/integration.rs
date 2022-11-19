@@ -2,7 +2,7 @@ use std::io::Read;
 use std::{fs, io};
 
 use ctcore::read::Reader;
-use ctcore::text::{Character, FortranFloat, FortranInt, Sequence, FixedCount};
+use ctcore::text::{Character, FixedCount, FortranFloat, FortranInt, Sequence, Count};
 
 use pretty_assertions::assert_eq;
 
@@ -71,11 +71,11 @@ fn read_molfile_header() -> Result<(), io::Error> {
     assert_eq!(reader.newline(), Ok(()));
     assert_eq!(reader.line::<80>(), Ok(Sequence::from_str("A Comment")));
     assert_eq!(reader.newline(), Ok(()));
-    assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(6)));
-    assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(5)));
+    assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(0)));
+    assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(0)));
     assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(0)));
     assert_eq!(reader.fixed_count::<3>(), Ok(None));
-    assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(1)));
+    assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(0)));
     assert_eq!(reader.fixed_count::<3>(), Ok(None));
     assert_eq!(reader.fixed_count::<3>(), Ok(None));
     assert_eq!(reader.fixed_count::<3>(), Ok(None));
@@ -83,6 +83,20 @@ fn read_molfile_header() -> Result<(), io::Error> {
     assert_eq!(reader.fixed_count::<3>(), Ok(None));
     assert_eq!(reader.fixed_count::<3>(), Ok(FixedCount::from_int(999)));
     assert_eq!(reader.sequence::<6>(), Ok(Sequence::from_str(" V2000")));
+    assert_eq!(reader.newline(), Ok(()));
+    assert_eq!(
+        reader.sequence::<13>(),
+        Ok(Sequence::from_str("M  V30 COUNTS"))
+    );
+    assert_eq!(reader.space(), Ok(()));
+    assert_eq!(reader.variable_count(), Ok(Count::from_int(1)));
+    assert_eq!(reader.space(), Ok(()));
+    assert_eq!(reader.variable_count(), Ok(Count::from_int(0)));
+    assert_eq!(reader.space(), Ok(()));
+    assert_eq!(reader.variable_count(), Ok(Count::from_int(0)));
+    assert_eq!(reader.space(), Ok(()));
+    assert_eq!(reader.variable_count(), Ok(Count::from_int(0)));
+    assert_eq!(reader.newline(), Ok(()));
 
     err
 }

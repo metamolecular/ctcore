@@ -1,4 +1,5 @@
 mod character;
+mod count;
 mod digit;
 mod fixed_count;
 mod fixed_natural;
@@ -9,6 +10,7 @@ mod non_zero_digit;
 mod sequence;
 
 pub use character::Character;
+pub use count::Count;
 pub use digit::Digit;
 pub use fixed_count::FixedCount;
 pub use fixed_natural::FixedNatural;

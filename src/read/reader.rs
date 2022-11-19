@@ -1,8 +1,8 @@
 use std::iter::Peekable;
 
 use crate::text::{
-    Character, Digit, FixedCount, FortranFloat, FortranInt, NonZeroDigit,
-    Sequence,
+    Character, Count, Digit, FixedCount, FortranFloat, FortranInt, Natural,
+    NonZeroDigit, Sequence,
 };
 
 use super::Error;
@@ -59,10 +59,16 @@ impl<'a> Reader<'a> {
     pub fn sequence<const L: usize>(
         &mut self,
     ) -> Result<Option<Sequence<L>>, Error> {
+        println!("sequence");
         let chars = match self.all_or_none(L)? {
             Some(chars) => chars,
-            None => return Ok(None),
+            None => {
+                println!("NONE");
+                return Ok(None);
+            }
         };
+
+        println!("chars {:?}", chars);
 
         Ok(Some(Sequence::new(chars).expect("sequence")))
     }
@@ -144,6 +150,35 @@ impl<'a> Reader<'a> {
         self.row += 1;
 
         Ok(())
+    }
+
+    pub fn space(&mut self) -> Result<(), Error> {
+        self.must_decode::<CodePoint<SP>>()?;
+
+        Ok(())
+    }
+
+    pub fn variable_count(&mut self) -> Result<Count, Error> {
+        let first = self.must_decode::<Digit>()?;
+
+        if first.is_zero() {
+            while self.may_decode::<CodePoint<ZE>>()?.is_some() {}
+        }
+
+        let head = match first.to_non_zero() {
+            Some(non_zero) => non_zero,
+            None => match self.may_decode::<NonZeroDigit>()? {
+                Some(non_zero) => non_zero,
+                None => return Ok(Count::Zero),
+            },
+        };
+        let mut tail = Vec::new();
+
+        while let Some(digit) = self.may_decode::<Digit>()? {
+            tail.push(digit)
+        }
+
+        Ok(Count::Positive(Natural { head, tail }))
     }
 
     fn must_decode<D: Decode>(&mut self) -> Result<D, Error> {
@@ -379,6 +414,7 @@ const RS: u8 = 0x1e;
 const SP: u8 = 0x20;
 const MI: u8 = 0x2d;
 const PO: u8 = 0x2e;
+const ZE: u8 = 0x30;
 
 #[cfg(test)]
 mod blacklist {
@@ -810,6 +846,90 @@ mod newline {
         assert_eq!(reader.newline(), Ok(()));
         assert_eq!(reader.column, 0);
         assert_eq!(reader.row, 1);
+    }
+}
+
+#[cfg(test)]
+mod variable_count {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn eof() {
+        let mut bytes = b"".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Err(Error::EndOfFile(0)))
+    }
+
+    #[test]
+    fn eol() {
+        let mut bytes = b"\n".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Err(Error::EndOfLine(0)))
+    }
+
+    #[test]
+    fn alpha() {
+        let mut bytes = b"x".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(
+            reader.variable_count(),
+            Err(Error::Character(0, 0, Digit::expecting()))
+        )
+    }
+
+    #[test]
+    fn zero_eof() {
+        let mut bytes = b"0".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Ok(Count::Zero))
+    }
+
+    #[test]
+    fn zero_zero_eof() {
+        let mut bytes = b"00".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Ok(Count::Zero));
+        assert_eq!(reader.column, 2)
+    }
+
+    #[test]
+    fn zero_non_zero_eof() {
+        let mut bytes = b"07".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Ok(Count::from_int(7)));
+        assert_eq!(reader.column, 2)
+    }
+
+    #[test]
+    fn non_zero_eof() {
+        let mut bytes = b"1".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Ok(Count::from_int(1)))
+    }
+
+    #[test]
+    fn non_zero_non_zero_eof() {
+        let mut bytes = b"42".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Ok(Count::from_int(42)))
+    }
+
+    #[test]
+    fn non_zero_non_zero_space() {
+        let mut bytes = b"42 ".iter().cloned();
+        let mut reader = Reader::new(&mut bytes);
+
+        assert_eq!(reader.variable_count(), Ok(Count::from_int(42)));
+        assert_eq!(reader.column, 2)
     }
 }
 
