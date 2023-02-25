@@ -10,5 +10,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - Builder-based reading.
 
-[Unreleased]: https://github.com/metamolecular/trey/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/metamolecular/trey/releases/tag/v0.2.0
+[Unreleased]: https://github.com/metamolecular/ctcore/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/metamolecular/ctcore/releases/tag/v0.2.0
