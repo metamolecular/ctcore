@@ -1,4 +1,4 @@
-use super::NonZeroDigit;
+use super::{NonZeroDigit, Printable};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Digit {
@@ -47,41 +47,70 @@ impl Digit {
         Self::NonZero(NonZeroDigit::D9)
     }
 
-    pub fn from_int(int: u32) -> Option<Self> {
-        match int {
-            0 => Some(Self::Zero),
-            1 => Some(Self::NonZero(NonZeroDigit::D1)),
-            2 => Some(Self::NonZero(NonZeroDigit::D2)),
-            3 => Some(Self::NonZero(NonZeroDigit::D3)),
-            4 => Some(Self::NonZero(NonZeroDigit::D4)),
-            5 => Some(Self::NonZero(NonZeroDigit::D5)),
-            6 => Some(Self::NonZero(NonZeroDigit::D6)),
-            7 => Some(Self::NonZero(NonZeroDigit::D7)),
-            8 => Some(Self::NonZero(NonZeroDigit::D8)),
-            9 => Some(Self::NonZero(NonZeroDigit::D9)),
+    pub fn from_printable(printable: Printable) -> Option<Self> {
+        match printable {
+            Printable::D0 => Some(Self::Zero),
+            Printable::D1 => Some(Self::NonZero(NonZeroDigit::D1)),
+            Printable::D2 => Some(Self::NonZero(NonZeroDigit::D2)),
+            Printable::D3 => Some(Self::NonZero(NonZeroDigit::D3)),
+            Printable::D4 => Some(Self::NonZero(NonZeroDigit::D4)),
+            Printable::D5 => Some(Self::NonZero(NonZeroDigit::D5)),
+            Printable::D6 => Some(Self::NonZero(NonZeroDigit::D6)),
+            Printable::D7 => Some(Self::NonZero(NonZeroDigit::D7)),
+            Printable::D8 => Some(Self::NonZero(NonZeroDigit::D8)),
+            Printable::D9 => Some(Self::NonZero(NonZeroDigit::D9)),
             _ => None,
         }
     }
 
-    pub fn from_byte(byte: u8) -> Option<Self> {
-        if byte == 0x30 {
-            Some(Self::Zero)
-        } else {
-            match NonZeroDigit::from_byte(byte) {
-                Some(non_zero) => Some(Self::NonZero(non_zero)),
-                None => None,
-            }
+    pub fn split(mut int: u32) -> Vec<Self> {
+        if int == 0 {
+            return vec![Digit::Zero];
         }
+
+        let mut digits = Vec::new();
+
+        while int > 0 {
+            digits.push(match int % 10 {
+                0 => Digit::Zero,
+                1 => Digit::NonZero(NonZeroDigit::D1),
+                2 => Digit::NonZero(NonZeroDigit::D2),
+                3 => Digit::NonZero(NonZeroDigit::D3),
+                4 => Digit::NonZero(NonZeroDigit::D4),
+                5 => Digit::NonZero(NonZeroDigit::D5),
+                6 => Digit::NonZero(NonZeroDigit::D6),
+                7 => Digit::NonZero(NonZeroDigit::D7),
+                8 => Digit::NonZero(NonZeroDigit::D8),
+                9 => Digit::NonZero(NonZeroDigit::D9),
+                _ => unreachable!(),
+            });
+
+            int /= 10;
+        }
+
+        digits.reverse();
+
+        digits
+    }
+}
+
+#[cfg(test)]
+mod split {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn zero() {
+        assert_eq!(Digit::split(0), vec![Digit::Zero])
     }
 
-    pub fn to_non_zero(self) -> Option<NonZeroDigit> {
-        match self {
-            Self::Zero => None,
-            Self::NonZero(non_zero) => Some(non_zero),
-        }
+    #[test]
+    fn one() {
+        assert_eq!(Digit::split(1), vec![Digit::NonZero(NonZeroDigit::D1)])
     }
 
-    pub fn is_zero(&self) -> bool {
-        self == &Self::Zero
+    #[test]
+    fn forty_two() {
+        assert_eq!(Digit::split(42), vec![Digit::d4(), Digit::d2()])
     }
 }

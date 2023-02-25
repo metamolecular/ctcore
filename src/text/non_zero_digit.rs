@@ -1,3 +1,5 @@
+use super::Printable;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum NonZeroDigit {
     D1,
@@ -12,17 +14,17 @@ pub enum NonZeroDigit {
 }
 
 impl NonZeroDigit {
-    pub fn from_byte(byte: u8) -> Option<Self> {
-        match byte {
-            0x31 => Some(Self::D1),
-            0x32 => Some(Self::D2),
-            0x33 => Some(Self::D3),
-            0x34 => Some(Self::D4),
-            0x35 => Some(Self::D5),
-            0x36 => Some(Self::D6),
-            0x37 => Some(Self::D7),
-            0x38 => Some(Self::D8),
-            0x39 => Some(Self::D9),
+    pub fn from_printable(printable: Printable) -> Option<Self> {
+        match printable {
+            Printable::D1 => Some(NonZeroDigit::D1),
+            Printable::D2 => Some(NonZeroDigit::D2),
+            Printable::D3 => Some(NonZeroDigit::D3),
+            Printable::D4 => Some(NonZeroDigit::D4),
+            Printable::D5 => Some(NonZeroDigit::D5),
+            Printable::D6 => Some(NonZeroDigit::D6),
+            Printable::D7 => Some(NonZeroDigit::D7),
+            Printable::D8 => Some(NonZeroDigit::D8),
+            Printable::D9 => Some(NonZeroDigit::D9),
             _ => None,
         }
     }

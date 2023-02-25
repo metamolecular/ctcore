@@ -1,15 +1,10 @@
-use std::ops::Range;
-
-use crate::text::Character;
+use crate::text::Printable;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
-    Blacklist(usize, Range<usize>),
-    Character(usize, usize, Vec<Character>),
-    CodePoint(usize, usize),
-    Continuation(usize, usize),
-    EndOfFile(usize),
-    EndOfLine(usize),
+    Character(usize, usize, Vec<Printable>),
+    Eof(usize),
+    Eol(usize),
     Overflow(usize, usize),
-    Unprintable(usize, usize),
+    Unprintable(usize, usize, u8),
 }
